@@ -1,3 +1,4 @@
+import folium
 from flask import Flask, jsonify, Response, render_template_string
 import json
 from services.sheets import GoogleSheetsService
@@ -106,60 +107,74 @@ def api_optimize():
 
 @app.route('/api/map', methods=['GET'])
 def api_map():
-    """Визуализация маршрута на карте"""
+    """
+    Упрощённая карта только с точками (без маршрутов)
+    Возвращает HTML или JSON в зависимости от параметра ?format
+    """
     from flask import request
-    from io import BytesIO
-    import base64
-    import folium
-    import openrouteservice as ors
-
-    # Получаем данные оптимизации
-    optimize_response = api_optimize()
-    if optimize_response.status_code != 200:
-        return optimize_response
-
-    route_data = optimize_response.get_json()
-
     try:
-        # Создаем карту
-        m = folium.Map(location=[59.9386, 30.3155], zoom_start=12)
+        # Параметры
+        format_type = request.args.get('format', 'html')
+        zoom = int(request.args.get('zoom', 12))
 
-        # Добавляем маршрут
-        if 'geometry' in route_data:
-            decoded = ors.convert.decode_polyline(route_data['geometry'])
-            folium.PolyLine(
-                locations=[(p[1], p[0]) for p in decoded['coordinates']],
-                color='blue',
-                weight=5,
-                opacity=0.7
-            ).add_to(m)
+        # Получаем адреса напрямую из Google Sheets
+        addresses = sheets_service.get_addresses()
+        if not addresses:
+            return jsonify({"error": "Нет данных для отображения"}), 400
 
-        # Добавляем точки маршрута
-        for idx, point in enumerate(route_data.get('points', [])):
+        # Центр карты - первый адрес или склад
+        center = [59.9386, 30.3155]  # Координаты склада по умолчанию
+        if addresses and 'lat' in addresses[0]:
+            center = [addresses[0]['lat'], addresses[0]['lon']]
+
+        # Создаём карту
+        m = folium.Map(
+            location=center,
+            zoom_start=zoom,
+            tiles='OpenStreetMap'
+        )
+
+        # Добавляем точки
+        for idx, point in enumerate(addresses):
+            if 'lat' not in point or 'lon' not in point:
+                continue  # Пропускаем точки без координат
+
             folium.Marker(
                 location=[point['lat'], point['lon']],
-                popup=f"<b>{point['company']}</b><br>"
-                      f"Адрес: {point['address']}<br>"
-                      f"Вес: {point['weight']} кг<br>"
-                      f"Дата: {point['delivery_date']}",
-                tooltip=f"{idx + 1}. {point['company']}",
-                icon=folium.Icon(color='red' if idx == 0 else 'blue')
+                popup=f"<b>{point.get('company', '?')}</b><hr>"
+                      f"Адрес: {point.get('address', '')}<br>"
+                      f"Вес: {point.get('weight', 0)} кг",
+                icon=folium.Icon(color='blue', icon='info-sign')
             ).add_to(m)
 
-        # Добавляем стартовую точку (склад)
+        # Добавляем склад (зелёный маркер)
         folium.Marker(
             location=[59.9386, 30.3155],
-            popup="<b>Склад</b><br>Начало маршрута",
-            icon=folium.Icon(color='green', icon='warehouse')
+            popup="<b>Склад</b>",
+            icon=folium.Icon(color='green', icon='home')
         ).add_to(m)
 
-        # Сохраняем карту в HTML
-        map_html = m._repr_html_()
-        return map_html
+        if format_type == 'json':
+            return jsonify({
+                'points': [
+                    {
+                        'lat': p['lat'],
+                        'lon': p['lon'],
+                        'company': p.get('company'),
+                        'address': p.get('address')
+                    }
+                    for p in addresses if 'lat' in p and 'lon' in p
+                ]
+            })
+
+        return m._repr_html_()
 
     except Exception as e:
-        logger.error(f"Map generation error: {str(e)}")
-        return json_response({'error': f'Ошибка создания карты: {str(e)}'}, 500)
+        logger.error(f"Map error: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Ошибка генерации карты",
+            "details": str(e)
+        }), 500
 
 def check_sheets_connection():
     """Проверяет подключение к Google Sheets"""
