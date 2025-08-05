@@ -9,6 +9,8 @@ class RoutePoint:
     weight: float
     lon: float
     lat: float
+    delivery_date: str = ""  # Добавляем новое поле
+    manager: str = ""        # Добавляем новое поле
 
 
 class Route:

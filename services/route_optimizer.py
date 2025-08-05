@@ -70,18 +70,24 @@ class RouteOptimizer:
         return None
 
     def _prepare_points(self, addresses: List[Dict]) -> List[RoutePoint]:
-        """Подготавливает точки маршрута с геокодированием"""
         points = []
         failed_addresses = 0
 
         for addr in addresses:
             try:
+                # Проверяем наличие обязательных полей
+                if not addr.get('address'):
+                    logger.warning(f"Skipping address without data: {addr}")
+                    continue
+
                 coords = self.geocoder.geocode(addr['address'])
                 if not coords:
+                    logger.warning(f"Geocoding failed for address: {addr['address']}")
                     failed_addresses += 1
                     continue
 
-                points.append(RoutePoint(
+                # Создаём точку с новыми полями
+                point = RoutePoint(
                     company=addr.get('company', 'Без названия'),
                     address=addr['address'],
                     weight=addr.get('weight', 0),
@@ -89,13 +95,15 @@ class RouteOptimizer:
                     lat=coords[1],
                     delivery_date=addr.get('delivery_date', ''),
                     manager=addr.get('manager', '')
-                ))
+                )
+                points.append(point)
+
             except Exception as e:
-                logger.warning(f"Failed to process address {addr.get('address')}: {str(e)}")
+                logger.error(f"Error processing address {addr.get('address')}: {str(e)}", exc_info=True)
                 failed_addresses += 1
 
         if failed_addresses > 0:
-            logger.warning(f"Failed to geocode {failed_addresses} addresses")
+            logger.warning(f"Failed to process {failed_addresses} addresses")
 
         return points
 

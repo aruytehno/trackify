@@ -79,35 +79,83 @@ def api_addresses():
 
 @app.route('/api/optimize', methods=['GET'])
 def api_optimize():
-    """Оптимизация маршрутов"""
-    addresses = sheets_service.get_addresses()
-    if not addresses:
-        return json_response({'error': 'Нет данных для оптимизации'}, 400)
+    """Оптимизация маршрутов с возвратом структурированных данных"""
+    try:
+        # 1. Получаем данные из Google Sheets
+        addresses = sheets_service.get_addresses()
+        if not addresses:
+            logger.error("No addresses found in Google Sheets")
+            return json_response({'error': 'Нет данных для оптимизации'}, 400)
 
-    if Config.OPTIMIZE_ROUTES:
-        route = route_optimizer.optimize(addresses)
-        if not route:
-            return json_response({'error': 'Не удалось оптимизировать маршрут'}, 400)
+        # 2. Оптимизация маршрута (если включена в конфиге)
+        if Config.OPTIMIZE_ROUTES:
+            route = route_optimizer.optimize(addresses)
 
+            if not route:
+                logger.error("Route optimization failed")
+                return json_response({'error': 'Не удалось оптимизировать маршрут'}, 400)
+
+            # 3. Формируем успешный ответ
+            response_data = {
+                'warehouse': {
+                    'address': Config.WAREHOUSE_ADDRESS,
+                    'lon': Config.WAREHOUSE_COORDS[0],
+                    'lat': Config.WAREHOUSE_COORDS[1],
+                    'type': 'warehouse'
+                },
+                'points': [{
+                    'company': p.company,
+                    'address': p.address,
+                    'weight': float(p.weight),
+                    'lon': float(p.lon),
+                    'lat': float(p.lat),
+                    'delivery_date': p.delivery_date,
+                    'manager': p.manager,
+                    'type': 'delivery_point',
+                    'sequence_number': idx + 1
+                } for idx, p in enumerate(route.points)],
+                'statistics': {
+                    'total_points': len(route.points),
+                    'total_weight': sum(float(p.weight) for p in route.points)
+                },
+                'geometry': route.geometry,
+                'metadata': {
+                    'optimized': True,
+                    'algorithm': 'openrouteservice'
+                }
+            }
+
+            # 4. Добавляем расчет расстояния (если есть геометрия)
+            if route.geometry:
+                try:
+                    decoded = ors.convert.decode_polyline(route.geometry)
+                    total_distance = sum(
+                        haversine(
+                            (decoded['coordinates'][i][1], decoded['coordinates'][i][0]),
+                            (decoded['coordinates'][i + 1][1], decoded['coordinates'][i + 1][0])
+                        ) for i in range(len(decoded['coordinates']) - 1)
+                    )
+                    response_data['statistics']['total_distance_km'] = round(total_distance, 2)
+                except Exception as e:
+                    logger.warning(f"Distance calculation error: {str(e)}")
+
+            return json_response(response_data)
+
+        # 5. Режим без оптимизации (просто возвращаем точки)
         return json_response({
-            'warehouse': {
-                'address': Config.WAREHOUSE_ADDRESS,
-                'lon': Config.WAREHOUSE_COORDS[0],
-                'lat': Config.WAREHOUSE_COORDS[1]
-            },
-            'points': [{
-                'company': p.company,
-                'address': p.address,
-                'weight': p.weight,
-                'lon': p.lon,
-                'lat': p.lat,
-                'delivery_date': p.delivery_date,
-                'manager': p.manager
-            } for p in route.points],
-            'geometry': route.geometry
+            'addresses': addresses,
+            'metadata': {
+                'optimized': False,
+                'note': 'Оптимизация отключена в конфигурации'
+            }
         })
-    else:
-        return json_response({'addresses': addresses})
+
+    except Exception as e:
+        logger.error(f"Optimization error: {str(e)}", exc_info=True)
+        return json_response({
+            'error': 'Внутренняя ошибка сервера',
+            'details': str(e)
+        }, 500)
 
 
 @app.route('/api/map', methods=['GET'])
