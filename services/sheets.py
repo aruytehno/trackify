@@ -1,6 +1,7 @@
 from googleapiclient.discovery import build
 from config import Config
 from utils.helpers import parse_weight
+from utils.validators import validate_date, validate_address
 
 class GoogleSheetsService:
     def __init__(self):
@@ -33,7 +34,8 @@ class GoogleSheetsService:
                     'address': row[1].strip(),
                     'weight': parse_weight(row[5] if len(row) > 5 else 0),
                     'delivery_date': row[6] if len(row) > 6 else '',
-                    'manager': row[8] if len(row) > 8 else ''
+                    'manager': row[8] if len(row) > 8 else '',
+                    'is_valid': validate_address(row[1].strip()) and validate_date(row[6] if len(row) > 6 else '')
                 })
             except Exception as e:
                 print(f"Ошибка обработки строки: {row}. Ошибка: {str(e)}")

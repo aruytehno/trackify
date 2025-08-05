@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv
+import logging
+from logging.handlers import RotatingFileHandler
 
 load_dotenv()
 
@@ -10,3 +12,17 @@ class Config:
     SHEET_RANGE = os.getenv('SHEET_RANGE', 'Лист1!A:Z')
     OPTIMIZE_ROUTES = True
     CACHE_EXPIRY = 3600  # 1 час в секундах
+
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            RotatingFileHandler('trackify.log', maxBytes=1000000, backupCount=3),
+            logging.StreamHandler()
+        ]
+    )
+
+setup_logging()
+logger = logging.getLogger(__name__)
