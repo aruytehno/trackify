@@ -27,6 +27,8 @@ INDEX_HTML = """
         }
         a { color: #3498db; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .connected { color: green; }
+        .disconnected { color: red; }
     </style>
 </head>
 <body>
@@ -43,8 +45,8 @@ INDEX_HTML = """
 
     <div class="endpoint">
         <h3>Статус системы:</h3>
-        <p>Google Sheets: <span style="color: green;">✓ подключено</span></p>
-        <p>OpenRouteService: <span style="color: green;">✓ подключено</span></p>
+        <p>Google Sheets: <span class="{{ sheets_class }}">{{ sheets_status }}</span></p>
+        <p>OpenRouteService: <span class="{{ ors_class }}">{{ ors_status }}</span></p>
     </div>
 </body>
 </html>
@@ -54,7 +56,17 @@ INDEX_HTML = """
 @app.route('/')
 def index():
     """Главная страница с документацией API"""
-    return render_template_string(INDEX_HTML)
+    sheets_ok = check_sheets_connection()
+    ors_ok = check_ors_connection()
+
+    return render_template_string(
+        INDEX_HTML,
+        sheets_status="✓ подключено" if sheets_ok else "✗ ошибка",
+        sheets_class="connected" if sheets_ok else "disconnected",
+        ors_status="✓ подключено" if ors_ok else "✗ ошибка",
+        ors_class="connected" if ors_ok else "disconnected"
+    )
+
 
 
 @app.route('/api/addresses', methods=['GET'])
@@ -148,6 +160,30 @@ def api_map():
     except Exception as e:
         logger.error(f"Map generation error: {str(e)}")
         return json_response({'error': f'Ошибка создания карты: {str(e)}'}, 500)
+
+def check_sheets_connection():
+    """Проверяет подключение к Google Sheets"""
+    try:
+        data = sheets_service.get_addresses()
+        return bool(data)
+    except Exception as e:
+        logger.error(f"Google Sheets connection error: {str(e)}")
+        return False
+
+
+def check_ors_connection():
+    """Проверяет подключение к OpenRouteService"""
+    try:
+        import openrouteservice as ors
+        client = ors.Client(key=Config.ORS_API_KEY)
+        response = client.pelias_search(
+            text="Дворцовая площадь, Санкт-Петербург",
+            focus_point=[30.3155, 59.9386]
+        )
+        return bool(response.get('features'))
+    except Exception as e:
+        logger.error(f"OpenRouteService connection error: {str(e)}")
+        return False
 
 
 def json_response(data, status_code=200):
