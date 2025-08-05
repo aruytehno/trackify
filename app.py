@@ -90,6 +90,11 @@ def api_optimize():
             return json_response({'error': 'Не удалось оптимизировать маршрут'}, 400)
 
         return json_response({
+            'warehouse': {
+                'address': Config.WAREHOUSE_ADDRESS,
+                'lon': Config.WAREHOUSE_COORDS[0],
+                'lat': Config.WAREHOUSE_COORDS[1]
+            },
             'points': [{
                 'company': p.company,
                 'address': p.address,

@@ -10,6 +10,8 @@ class Config:
     ORS_API_KEY = os.getenv('ORS_API_KEY')
     SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
     SHEET_RANGE = os.getenv('SHEET_RANGE', 'Лист1!A:Z')
+    WAREHOUSE_ADDRESS = "Санкт-Петербург, ул. Складская, 1"  # Пример
+    WAREHOUSE_COORDS = [30.3155, 59.9386]  # Широта/долгота
     OPTIMIZE_ROUTES = True
     CACHE_EXPIRY = 3600  # 1 час в секундах
 

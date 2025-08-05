@@ -10,6 +10,7 @@ class RouteOptimizer:
     def __init__(self):
         """Инициализация сервиса оптимизации маршрутов"""
         try:
+            self.warehouse_coords = Config.WAREHOUSE_COORDS
             self.client = ors.Client(key=Config.ORS_API_KEY)
             self.geocoder = Geocoder()
             logger.info("RouteOptimizer initialized successfully")
@@ -18,6 +19,14 @@ class RouteOptimizer:
             raise
 
     def optimize(self, addresses: List[Dict]) -> Optional[Route]:
+        # Добавляем склад как стартовую точку
+        warehouse_point = RoutePoint(
+            company="Склад",
+            address=Config.WAREHOUSE_ADDRESS,
+            weight=0,
+            lon=self.warehouse_coords[0],
+            lat=self.warehouse_coords[1]
+        )
         """
         Оптимизирует маршрут для заданных адресов
 
