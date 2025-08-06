@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Ошибка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .error-box {
+            background: #ffecec;
+            border: 1px solid #ff6b6b;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-
+    <div class="error-box">
+        <h2>Ошибка</h2>
+        <p>{{ error_message }}</p>
+        <a href="/">Попробовать снова</a>
+    </div>
 </body>
 </html>

@@ -1,33 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trackify - Карта заказов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .container { display: flex; height: 100vh; }
-        .sidebar { width: 300px; padding: 20px; overflow-y: auto; }
-        #map { flex: 1; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 350px;
+            padding: 20px;
+            background: #f5f5f5;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .address-list {
+            margin-top: 20px;
+        }
+        .address-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .address-item:hover {
+            background: #eaeaea;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>Параметры</h2>
+    <div class="sidebar">
+        <h1>Trackify</h1>
+
+        <div class="form-group">
+            <h3>Адрес склада</h3>
             <form method="POST">
-                <label>Адрес склада:</label>
-                <input type="text" name="warehouse"
+                <input type="text"
+                       name="warehouse"
                        value="{{ warehouse_address }}"
                        placeholder="Введите адрес склада">
                 <button type="submit">Обновить</button>
             </form>
-
-            <h3>Адреса доставки</h3>
-            <ul>
-                {% for address in addresses %}
-                <li>{{ address.company }}: {{ address.address }}</li>
-                {% endfor %}
-            </ul>
         </div>
 
+        <div class="address-list">
+            <h3>Адреса доставки ({{ addresses|length }})</h3>
+            {% for address in addresses %}
+            <div class="address-item">
+                <strong>{{ address.company or 'Без названия' }}</strong><br>
+                {{ address.address }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="map-container">
         <div id="map">
             {{ map_html|safe }}
         </div>
