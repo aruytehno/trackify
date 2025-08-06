@@ -60,16 +60,6 @@ def process_delivery_addresses() -> tuple[List[Dict[str, Any]], int]:
     return valid_addresses, success_count
 
 
-def add_delivery_markers(map_obj: folium.Map, addresses: List[Dict[str, Any]]) -> None:
-    """Добавляет маркеры доставки на карту"""
-    for address in addresses:
-        folium.Marker(
-            location=address['coords'],
-            popup=f"<b>{address.get('company', 'Без названия')}</b><br>{address['address']}",
-            icon=folium.Icon(color='blue', icon='truck', prefix='fa')
-        ).add_to(map_obj)
-
-
 @app.route('/')
 def index():
     try:
@@ -87,12 +77,14 @@ def index():
         # Собираем все координаты для автоматического масштабирования
         all_coords = [warehouse_coords]
 
-        # Добавляем маркеры и собираем координаты
-        for address in valid_addresses:
+        # Добавляем маркеры с уникальными классами для подсветки
+        for idx, address in enumerate(valid_addresses):
             folium.Marker(
                 location=address['coords'],
                 popup=f"<b>{address.get('company', 'Без названия')}</b><br>{address['address']}",
-                icon=folium.Icon(color='blue', icon='truck', prefix='fa')
+                icon=folium.Icon(color='blue', icon='truck', prefix='fa'),
+                # Добавляем класс для идентификации маркера
+                icon_options={'className': f'delivery-marker marker-{idx}'}
             ).add_to(m)
             all_coords.append(address['coords'])
 
@@ -119,4 +111,4 @@ def index():
 
 if __name__ == '__main__':
     logger.info("Starting Trackify application")
-    app.run(host='0.0.0.0', port=5000, debug=False)  # В продакшне debug=False
+    app.run(host='0.0.0.0', port=5000, debug=False)

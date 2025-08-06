@@ -11,14 +11,18 @@ def get_addresses():
         ).execute()
 
         rows = result.get('values', [])
-        if not rows or len(rows) < 2:  # Проверяем, что есть хотя бы заголовок и одна строка
+        if not rows or len(rows) < 2:
             return []
 
+        # Исключаем строки с заголовками столбцов
         return [
             {'company': row[0] if len(row) > 0 else 'Без названия',
              'address': row[1] if len(row) > 1 else ''}
             for row in rows[1:]  # Пропускаем заголовок
-            if len(row) > 1 and row[1].strip()  # Только строки с адресом
+            if len(row) > 1
+            and row[1].strip()
+            and row[0] != 'Название компании'  # Исключаем заголовки
+            and row[1] != 'Адрес'              # Исключаем заголовки
         ]
     except Exception as e:
         logger.error("Error fetching data from Google Sheets: %s", str(e))

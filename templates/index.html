@@ -1,3 +1,4 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -48,6 +49,15 @@
         .address-item:hover {
             background: #eaeaea;
         }
+        .address-item.highlighted {
+            background: #ffeb3b;
+            border-left: 3px solid #ff9800;
+        }
+        .marker-highlight {
+            filter: hue-rotate(90deg) saturate(200%);
+            transform: scale(1.2);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +72,9 @@
         <div class="address-list">
             <h3>Адреса доставки ({{ addresses|length }})</h3>
             {% for address in addresses %}
-            <div class="address-item">
+            <div class="address-item"
+                 data-index="{{ loop.index0 }}"
+                 onclick="highlightMarker({{ loop.index0 }})">
                 <strong>{{ address.company or 'Без названия' }}</strong><br>
                 {{ address.address }}
             </div>
@@ -75,5 +87,43 @@
             {{ map_html|safe }}
         </div>
     </div>
+
+<script>
+        // Функция для подсветки маркера
+        function highlightMarker(index) {
+            // Сбрасываем предыдущие подсветки
+            document.querySelectorAll('.address-item').forEach(item => {
+                item.classList.remove('highlighted');
+            });
+
+            // Подсвечиваем выбранный элемент списка
+            const selectedItem = document.querySelector(`.address-item[data-index="${index}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('highlighted');
+                selectedItem.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+
+            // Сбрасываем подсветку маркеров
+            document.querySelectorAll('.marker-highlight').forEach(marker => {
+                marker.classList.remove('marker-highlight');
+            });
+
+            // Подсвечиваем соответствующий маркер на карте
+            const marker = document.querySelector(`.marker-${index}`);
+            if (marker) {
+                marker.classList.add('marker-highlight');
+
+                // Находим и открываем попап
+                const markerParent = marker.closest('.leaflet-marker-pane');
+                if (markerParent) {
+                    const popups = markerParent.querySelectorAll('.leaflet-popup');
+                    if (popups.length > 0) {
+                        // Открываем первый попап (может потребоваться доработка)
+                        popups[0].style.display = 'block';
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>
