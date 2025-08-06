@@ -98,7 +98,15 @@ def index():
             'index.html',
             map_html=m._repr_html_(),
             warehouse_address=warehouse_address,
-            addresses=valid_addresses
+            addresses=valid_addresses,
+            coordinates_json=[  # Добавляем данные о координатах для JS
+                {
+                    'lat': addr['coords'][0],
+                    'lon': addr['coords'][1],
+                    'popup': f"<b>{addr.get('company', 'Без названия')}</b><br>{addr['address']}"
+                }
+                for addr in valid_addresses
+            ]
         )
 
     except Exception as e:
