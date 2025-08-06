@@ -83,7 +83,22 @@ def index():
 
         # Обрабатываем адреса доставки
         valid_addresses, success_count = process_delivery_addresses()
-        add_delivery_markers(m, valid_addresses)
+
+        # Собираем все координаты для автоматического масштабирования
+        all_coords = [warehouse_coords]
+
+        # Добавляем маркеры и собираем координаты
+        for address in valid_addresses:
+            folium.Marker(
+                location=address['coords'],
+                popup=f"<b>{address.get('company', 'Без названия')}</b><br>{address['address']}",
+                icon=folium.Icon(color='blue', icon='truck', prefix='fa')
+            ).add_to(m)
+            all_coords.append(address['coords'])
+
+        # Автоматическое масштабирование под все точки
+        if len(all_coords) > 1:
+            m.fit_bounds(all_coords)
 
         logger.info(f"Map generated with {success_count} delivery points")
 
