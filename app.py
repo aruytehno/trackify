@@ -41,12 +41,17 @@ def process_delivery_addresses() -> tuple[List[Dict[str, Any]], int]:
     valid_addresses = []
     success_count = 0
 
-    for address in get_addresses():
+    addresses = get_addresses()
+    logger.info(f"Total addresses from Google Sheets: {len(addresses)}")
+
+    for address in addresses:
         if not address.get('address'):
             continue
 
-        if coords := geocode_address(address['address']):
-            address['coords'] = coords[::-1]  # Сохраняем координаты [lat, lon]
+        coords = geocode_address(address['address'])
+        if coords:
+            logger.info(f"Geocoded address: {address['address']} -> {coords}")
+            address['coords'] = coords
             valid_addresses.append(address)
             success_count += 1
         else:
