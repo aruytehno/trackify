@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trackify - Карта заказов</title>
+    <style>
+        .container { display: flex; height: 100vh; }
+        .sidebar { width: 300px; padding: 20px; overflow-y: auto; }
+        #map { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Параметры</h2>
+            <form method="POST">
+                <label>Адрес склада:</label>
+                <input type="text" name="warehouse"
+                       value="{{ warehouse_address }}"
+                       placeholder="Введите адрес склада">
+                <button type="submit">Обновить</button>
+            </form>
+
+            <h3>Адреса доставки</h3>
+            <ul>
+                {% for address in addresses %}
+                <li>{{ address.company }}: {{ address.address }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="map">
+            {{ map_html|safe }}
+        </div>
+    </div>
+</body>
+</html>
