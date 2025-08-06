@@ -31,24 +31,11 @@
             color: #2c3e50;
             margin-top: 0;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #2980b9;
+        .warehouse-info {
+            padding: 15px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
         .address-list {
             margin-top: 20px;
@@ -67,15 +54,9 @@
     <div class="sidebar">
         <h1>Trackify</h1>
 
-        <div class="form-group">
+        <div class="warehouse-info">
             <h3>Адрес склада</h3>
-            <form method="POST">
-                <input type="text"
-                       name="warehouse"
-                       value="{{ warehouse_address }}"
-                       placeholder="Введите адрес склада">
-                <button type="submit">Обновить</button>
-            </form>
+            <p>{{ warehouse_address }}</p>
         </div>
 
         <div class="address-list">

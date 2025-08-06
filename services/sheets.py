@@ -1,5 +1,5 @@
 from googleapiclient.discovery import build
-from config import Config
+from config import Config, logger
 
 
 def get_addresses():

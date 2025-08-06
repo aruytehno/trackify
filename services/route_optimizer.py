@@ -3,7 +3,7 @@ import openrouteservice as ors
 from typing import List, Dict, Optional
 from config import Config, logger
 from models.route import RoutePoint, Route
-from services.geocoder import Geocoder
+from services.geocoder import geocode_address  # Добавить в imports
 
 
 class RouteOptimizer:
