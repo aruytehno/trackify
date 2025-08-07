@@ -1,50 +1,49 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Получаем координаты из скрытого JSON
     const coordinates = JSON.parse(document.getElementById('map-coordinates').textContent);
+
     const markerList = [];
-    let map = null;
 
-    const iframe = document.querySelector("#map iframe");
-
-    if (iframe) {
-        iframe.addEventListener("load", () => {
-            const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-            map = iframe.contentWindow.map_7e281b30fe648e76faa03c4bcd5a92a0;
-
-            coordinates.forEach((coord, index) => {
-                const marker = L.marker([coord.lat, coord.lon], {
-                    icon: L.AwesomeMarkers.icon({
-                        icon: 'truck',
-                        prefix: 'fa',
-                        markerColor: 'blue'
-                    })
-                }).addTo(map).bindPopup(coord.popup);
-
-                markerList.push(marker);
-            });
-        });
-    }
+    // Leaflet карта, создаваемая Folium, глобально доступна как переменная map
+    // Собираем все маркеры, добавленные Folium (в т.ч. склад и доставки)
+    map.eachLayer(function(layer) {
+        if (layer instanceof L.Marker) {
+            markerList.push(layer);
+        }
+    });
 
     window.highlightMarker = function(index) {
-        document.querySelectorAll('.address-item').forEach(item => {
-            item.classList.remove('highlighted');
-        });
-        document.querySelector(`.address-item[data-index="${index}"]`).classList.add('highlighted');
+        // Убираем подсветку со всех адресов в списке
+        document.querySelectorAll('.address-item').forEach(item => item.classList.remove('highlighted'));
 
-        if (!markerList.length || !map) return;
+        // Подсвечиваем кликнутый адрес
+        const selectedAddress = document.querySelector(`.address-item[data-index="${index}"]`);
+        if (selectedAddress) selectedAddress.classList.add('highlighted');
 
+        // Проверяем что есть маркер с таким индексом (учитывая, что первый маркер — склад)
+        // Так как склад — первый маркер, а доставки начинаются с индекса 1
+        // индекс адреса из списка соответствует markerList индекс смещён на +1
+        const markerIndex = index + 1;
+        if (!markerList.length || !map || !markerList[markerIndex]) return;
+
+        // Сбрасываем иконки всех маркеров (синий цвет)
         markerList.forEach(m => m.setIcon(L.AwesomeMarkers.icon({
             icon: 'truck',
             prefix: 'fa',
             markerColor: 'blue'
         })));
 
-        markerList[index].setIcon(L.AwesomeMarkers.icon({
+        // Подсвечиваем выбранный маркер (оранжевый)
+        markerList[markerIndex].setIcon(L.AwesomeMarkers.icon({
             icon: 'truck',
             prefix: 'fa',
             markerColor: 'orange'
         }));
 
-        map.setView(markerList[index].getLatLng(), 14);
-        markerList[index].openPopup();
+        // Центрируем карту на выбранном маркере
+        map.setView(markerList[markerIndex].getLatLng(), 14);
+
+        // Открываем попап
+        markerList[markerIndex].openPopup();
     };
 });

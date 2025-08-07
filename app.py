@@ -94,12 +94,14 @@ def index():
 
         logger.info(f"Map generated with {success_count} delivery points")
 
+        map_html = m.get_root().render()
+
         return render_template(
             'index.html',
-            map_html=m._repr_html_(),
+            map_html=map_html,
             warehouse_address=warehouse_address,
             addresses=valid_addresses,
-            coordinates_json=[  # Добавляем данные о координатах для JS
+            coordinates_json=[  # Данные для JS (маркер и адрес)
                 {
                     'lat': addr['coords'][0],
                     'lon': addr['coords'][1],
@@ -108,6 +110,7 @@ def index():
                 for addr in valid_addresses
             ]
         )
+
 
     except Exception as e:
         logger.error(f"Error in index route: {str(e)}", exc_info=True)

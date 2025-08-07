@@ -1,24 +1,25 @@
-<!-- Измените body в templates/index.html -->
 <body>
     <div class="main-container">
         <div class="sidebar">
-            <h1>Trackify</h1>
+            <div class="sidebar-content">
+                <h1>Trackify</h1>
 
-            <div class="warehouse-info">
-                <h3>Адрес склада</h3>
-                <p>{{ warehouse_address }}</p>
-            </div>
-
-            <div class="address-list">
-                <h3>Адреса доставки ({{ addresses|length }})</h3>
-                {% for address in addresses %}
-                <div class="address-item"
-                     data-index="{{ loop.index0 }}"
-                     onclick="highlightMarker({{ loop.index0 }})">
-                    <strong>{{ address.company or 'Без названия' }}</strong><br>
-                    {{ address.address }}
+                <div class="warehouse-info">
+                    <h3>Адрес склада</h3>
+                    <p>{{ warehouse_address }}</p>
                 </div>
-                {% endfor %}
+
+                <div class="address-list">
+                    <h3>Адреса доставки ({{ addresses|length }})</h3>
+                    {% for address in addresses %}
+                    <div class="address-item"
+                         data-index="{{ loop.index0 }}"
+                         onclick="highlightMarker({{ loop.index0 }})">
+                        <strong>{{ address.company or 'Без названия' }}</strong><br>
+                        {{ address.address }}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 

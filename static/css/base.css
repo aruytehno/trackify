@@ -4,9 +4,12 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: hidden; /* Предотвращаем появление скролла на всем документе */
 }
 
+body {
+    font-family: Arial, sans-serif;
+}
 .error-box {
     background: #ffecec;
     border: 1px solid #ff6b6b;

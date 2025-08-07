@@ -1,22 +1,56 @@
+/* static/css/map.css */
 .main-container {
     display: flex;
-    flex-direction: row;
+    height: 100vh; /* Занимаем всю высоту viewport */
+    width: 100vw; /* Занимаем всю ширину viewport */
+}
+
+/* Исправление для сайдбара */
+.main-container {
+    position: relative;
     height: 100vh;
-    width: 100%;
+    width: 100vw;
+    overflow: hidden;
 }
 
 .sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     width: 350px;
-    padding: 20px;
     background: #f5f5f5;
-    overflow-y: auto;
+    z-index: 1000;
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    height: 100%;
 }
 
 .map-container {
+    position: absolute;
+    left: 350px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.warehouse-info {
+    padding: 15px;
+    background: #e8f4fc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.address-list {
+    margin-top: 20px;
     flex: 1;
-    height: 100%;
+    overflow-y: auto;
 }
 
 .address-item {
