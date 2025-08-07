@@ -301,3 +301,16 @@
 .accordion-content.expanded {
     max-height: 1000px; /* Достаточно большое значение для контента */
 }
+
+/* Прокрутка внутри аккордеона */
+.accordion-content .address-list-scroll {
+    max-height: 300px;    /* подберите под ваш дизайн */
+    overflow-y: auto;
+    padding-right: 5px;   /* чтобы скроллбар не наезжал на контент */
+}
+
+.accordion-content .vehicle-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
