@@ -133,6 +133,8 @@
                 console.error('Error parsing coordinates:', e);
             }
         });
+            console.log('Coordinates data:', JSON.parse(document.getElementById('map-coordinates').textContent));
+            console.log('Map HTML:', document.getElementById('map').innerHTML.length > 0 ? 'exists' : 'empty');
     </script>
 </body>
 </html>
