@@ -1,12 +1,22 @@
 from config import Config, logger
 import openrouteservice as ors
 from utils.decorators import cache_geocode
+import json
+import os
 
 # Инициализация клиента ORS (только если не в мок-режиме)
 client = None if Config.USE_MOCK_DATA else ors.Client(key=Config.ORS_API_KEY)
 
-# Тестовые данные (ключи в нижнем регистре)
-
+# Загрузка мок-данных
+MOCK_GEOCODE_DATA = {}
+if Config.USE_MOCK_DATA:
+    try:
+        with open('mock_geodata.json', 'r', encoding='utf-8') as f:
+            MOCK_GEOCODE_DATA = json.load(f)
+    except FileNotFoundError:
+        logger.warning("Mock data file not found, using empty mock dataset")
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in mock data file")
 
 @cache_geocode
 def geocode_address(address):
@@ -24,6 +34,7 @@ def geocode_address(address):
             logger.warning(f"Адрес не найден в мок-данных: {address}")
             return [59.934280, 30.335099]  # Координаты по умолчанию (центр СПб)
 
+    # Остальной код функции без изменений...
     # Реальный запрос к ORS API
     try:
         geo = client.pelias_search(

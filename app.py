@@ -135,7 +135,7 @@ def index():
 
         return render_template(
             'index.html',
-            map_html=map_html,
+            # map_html=m.get_root().render(),  # Убрать эту строку
             warehouse_address=warehouse_address,
             addresses=valid_addresses,
             vehicles=Config.VEHICLES,
