@@ -2,7 +2,11 @@ from config import Config, logger
 import openrouteservice as ors
 from utils.decorators import cache_geocode
 
-client = ors.Client(key=Config.ORS_API_KEY)
+# Инициализация клиента ORS (только если не в мок-режиме)
+client = None if Config.USE_MOCK_DATA else ors.Client(key=Config.ORS_API_KEY)
+
+# Тестовые данные (ключи в нижнем регистре)
+
 
 @cache_geocode
 def geocode_address(address):

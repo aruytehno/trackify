@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trackify - Карта заказов</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <!-- Awesome Markers CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Ваши стили -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
     <style>
@@ -15,6 +23,15 @@
             padding: 0;
             font-family: Arial, sans-serif;
             overflow: hidden;
+        }
+        /* Гарантируем, что карта будет видимой */
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
         }
     </style>
 </head>
@@ -89,6 +106,33 @@
     <script id="map-coordinates" type="application/json">{{ coordinates_json | tojson | safe }}</script>
 
     <!-- Скрипты -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
+    <!-- Awesome Markers JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+    <!-- Ваш скрипт -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+    <!-- Отладочная информация -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+            if (typeof L === 'undefined') {
+                console.error('Leaflet not loaded');
+            }
+            if (typeof L.AwesomeMarkers === 'undefined') {
+                console.error('AwesomeMarkers not loaded');
+            }
+            try {
+                const coords = JSON.parse(document.getElementById('map-coordinates').textContent);
+                console.log('Coordinates data:', coords);
+                console.log('Map object exists:', typeof map !== 'undefined');
+            } catch (e) {
+                console.error('Error parsing coordinates:', e);
+            }
+        });
+    </script>
 </body>
 </html>
