@@ -1,28 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trackify - Карта заказов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
+    <style>
+        /* Гарантированные базовые стили */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+    </style>
+</head>
 <body>
+    <!-- Основной контейнер -->
     <div class="main-container">
+        <!-- Сайдбар -->
         <div class="sidebar">
-            <div class="sidebar-content">
-                <h1>Trackify</h1>
-
+            <div class="sidebar-header">
+                <h1><i class="fas fa-route"></i> Trackify</h1>
                 <div class="warehouse-info">
-                    <h3>Адрес склада</h3>
+                    <h3><i class="fas fa-warehouse"></i> Адрес склада</h3>
                     <p>{{ warehouse_address }}</p>
                 </div>
+            </div>
 
-                <div class="address-list">
-                    <h3>Адреса доставки ({{ addresses|length }})</h3>
+            <!-- Список адресов -->
+            <div class="address-list-container">
+                <div class="address-list-header">
+                    <h3><i class="fas fa-map-marker-alt"></i> Адреса доставки <span class="badge">{{ addresses|length }}</span></h3>
+                </div>
+
+                <div class="address-list-scroll">
                     {% for address in addresses %}
                     <div class="address-item"
                          data-index="{{ loop.index0 }}"
                          onclick="highlightMarker({{ loop.index0 }})">
-                        <strong>{{ address.company or 'Без названия' }}</strong><br>
-                        {{ address.address }}
+                        <div class="address-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="address-details">
+                            <strong>{{ address.company or 'Без названия' }}</strong>
+                            <p>{{ address.address }}</p>
+                            {% if address.weight %}
+                            <span class="weight-badge">{{ address.weight }} кг</span>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
+        <!-- Карта -->
         <div class="map-container">
             <div id="map">
                 {{ map_html|safe }}
@@ -30,9 +66,10 @@
         </div>
     </div>
 
-    <!-- Скрытый элемент для хранения координат -->
+    <!-- Данные для JS -->
     <script id="map-coordinates" type="application/json">{{ coordinates_json | tojson | safe }}</script>
 
-    <!-- Подключение JavaScript -->
+    <!-- Скрипты -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
+</html>
