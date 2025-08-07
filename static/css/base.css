@@ -1,0 +1,26 @@
+/* static/css/base.css */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+}
+
+.error-box {
+    background: #ffecec;
+    border: 1px solid #ff6b6b;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.warehouse-info {
+    padding: 15px;
+    background: #e8f4fc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.address-list {
+    margin-top: 20px;
+}
