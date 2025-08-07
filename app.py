@@ -62,21 +62,30 @@ def index():
                 'gray'
             )
 
-            route_points = []
-            for point in route.points:
-                route_points.append({
-                    'lat': point.lat,
-                    'lon': point.lon,
-                    'popup': f"<b>{point.company}</b><br>{point.address}",
-                    'weight': point.weight
-                })
+            # Подготавливаем данные о маршрутах для шаблона
+            route_details = {}
+            for vehicle_id, route in optimized_routes.items():
+                color = next(
+                    (v['color'] for v in Config.VEHICLES if v['id'] == vehicle_id),
+                    'gray'
+                )
 
-            route_details[vehicle_id] = {
-                'color': color,
-                'points': route_points,
-                'total_weight': sum(p.weight for p in route.points),
-                'stops_count': len(route.points)
-            }
+                route_points = []
+                for point in route.points:
+                    route_points.append({
+                        'lat': point.lat,
+                        'lon': point.lon,
+                        'popup': f"<b>{point.company}</b><br>{point.address}",
+                        'weight': point.weight
+                    })
+
+                route_details[vehicle_id] = {
+                    'color': color,
+                    'points': route_points,
+                    'total_weight': sum(p.weight for p in route.points),
+                    'stops_count': len(route.points),
+                    'geometry': route.geometry  # Добавляем геометрию маршрута
+                }
 
         logger.info(f"Generated routes for {success_count} delivery points across {len(optimized_routes)} vehicles")
 

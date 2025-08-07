@@ -132,7 +132,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
     <!-- Ваш скрипт -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
-
+    <!-- В секции с данными для JS добавьте: -->
+    <script id="map-routes" type="application/json">{{ routes | tojson | safe }}</script>
     <!-- Отладочная информация -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

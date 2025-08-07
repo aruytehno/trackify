@@ -25,21 +25,34 @@ class RouteOptimizer:
         if not points:
             return {}
 
-        jobs = [{
-            'id': idx,
-            'location': [point.lon, point.lat],
-            'amount': [math.ceil(point.weight)],
-            'service': 300
-        } for idx, point in enumerate(points)]
+        # Подготовка заданий с учетом временных окон
+        jobs = []
+        for idx, point in enumerate(points):
+            job = {
+                'id': idx,
+                'location': [point.lon, point.lat],
+                'amount': [math.ceil(point.weight)],
+                'service': 300  # Время обслуживания в секундах (5 минут)
+            }
 
-        vehicles = [{
-            'id': vehicle['id'],
-            'profile': 'driving-car',
-            'start': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
-            'end': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
-            'capacity': [vehicle['capacity']],
-            'time_window': [28800, 64800]
-        } for vehicle in Config.VEHICLES]
+            # Добавляем временное окно, если указано
+            if hasattr(point, 'time_window') and point.time_window:
+                job['time_windows'] = [point.time_window]
+
+            jobs.append(job)
+
+        # Подготовка транспортных средств с временными ограничениями
+        vehicles = []
+        for vehicle in Config.VEHICLES:
+            vehicle_def = {
+                'id': vehicle['id'],
+                'profile': 'driving-car',
+                'start': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
+                'end': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
+                'capacity': [vehicle['capacity']],
+                'time_window': [28800, 64800]  # 8:00-18:00 (в секундах от полуночи)
+            }
+            vehicles.append(vehicle_def)
 
         try:
             response = self.client.optimization(
@@ -53,6 +66,9 @@ class RouteOptimizer:
             for vehicle in response['routes']:
                 route_id = vehicle['vehicle']
                 optimized_routes[route_id] = Route.from_ors_response(vehicle, points)
+
+                # Добавляем геометрию маршрута для отображения на карте
+                optimized_routes[route_id].geometry = vehicle['geometry']
 
             return optimized_routes
         except Exception as e:

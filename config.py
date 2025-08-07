@@ -10,6 +10,9 @@ load_dotenv()
 class Config:
     USE_MOCK_DATA = os.getenv('USE_MOCK_DATA', 'false').lower() == 'true'
 
+    # В config.py добавьте:
+    BALANCING_STRATEGY = 'capacity'  # или 'distance' или 'mixed'
+
     GOOGLE_SHEETS_API_KEY = os.getenv('GOOGLE_SHEETS_API_KEY')
     ORS_API_KEY = os.getenv('ORS_API_KEY')
     SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')

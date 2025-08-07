@@ -79,6 +79,27 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 });
 
+    // Добавляем маршруты для каждого автомобиля
+    if (coordinates.routes) {
+        Object.entries(coordinates.routes).forEach(([vehicleId, route]) => {
+            if (route.geometry) {
+                const routeGeometry = L.Polyline.fromEncoded(route.geometry, {
+                    color: route.color || 'blue',
+                    weight: 4,
+                    opacity: 0.7,
+                    smoothFactor: 1
+                }).addTo(map);
+
+                // Добавляем информацию о маршруте
+                routeGeometry.bindPopup(`
+                    <b>Автомобиль ${vehicleId}</b><br>
+                    Остановок: ${route.stops_count}<br>
+                    Общий вес: ${route.total_weight} кг
+                `);
+            }
+        });
+    }
+
 
 // Функция переключения аккордиона
 function toggleAccordion(header) {
