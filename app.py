@@ -84,7 +84,7 @@ def index():
                 popup=f"<b>{address.get('company', 'Без названия')}</b><br>{address['address']}",
                 icon=folium.Icon(color='blue', icon='truck', prefix='fa'),
                 # Добавляем класс для идентификации маркера
-                icon_options={'className': f'delivery-marker marker-{idx}'}
+                # icon_options={'className': f'delivery-marker marker-{idx}'}
             ).add_to(m)
             all_coords.append(address['coords'])
 

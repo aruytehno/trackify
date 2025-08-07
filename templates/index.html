@@ -59,17 +59,6 @@
             transition: all 0.3s ease;
         }
 
-        .marker-highlight {
-        animation: pulse 1s infinite;
-        transform: scale(1.3);
-        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9));
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1.1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1.1); }
-        }
 
         .address-item.highlighted {
             background-color: #fffacd;
@@ -107,108 +96,59 @@
     </div>
 
 <script>
-    // Данные о маркерах
-    const markersData = [
-        {% for address in addresses %}
-        {
-            lat: {{ address.coords[0] }},
-            lng: {{ address.coords[1] }},
-            company: `{{ address.company|default('Без названия') }}`,
-            address: `{{ address.address }}`,
-            index: {{ loop.index0 }}
-        },
-        {% endfor %}
-    ];
+    const coordinates = {{ coordinates_json | tojson }};
+    const markerList = [];
 
-    // Ждем загрузки карты
-    document.addEventListener('DOMContentLoaded', function() {
-        // Находим iframe с картой
-        const mapFrame = document.querySelector('#map iframe');
+    let map = null;
 
-        if (!mapFrame) {
-            console.error('Карта не найдена');
-            return;
-        }
+    document.addEventListener("DOMContentLoaded", function () {
+        // Получаем iframe, созданный folium
+        const iframe = document.querySelector("#map iframe");
 
-        // Ждем загрузки iframe
-        mapFrame.addEventListener('load', function() {
-            try {
-                // Получаем доступ к Leaflet из iframe
-                const L = mapFrame.contentWindow.L;
-                if (!L) {
-                    console.error('Leaflet не загружен');
-                    return;
-                }
+        iframe.addEventListener("load", () => {
+            const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+            map = iframe.contentWindow.map_7e281b30fe648e76faa03c4bcd5a92a0; // имя карты folium
 
-                // Получаем карту из Folium
-                const foliumMap = mapFrame.contentWindow.map;
-                if (!foliumMap) {
-                    console.error('Карта Folium не найдена');
-                    return;
-                }
+            // Добавляем маркеры вручную в JS
+            coordinates.forEach((coord, index) => {
+                const marker = L.marker([coord.lat, coord.lon], {
+                    icon: L.AwesomeMarkers.icon({
+                        icon: 'truck',
+                        prefix: 'fa',
+                        markerColor: 'blue'
+                    })
+                }).addTo(map).bindPopup(coord.popup);
 
-                // Собираем все маркеры с карты
-                const allMarkers = [];
-                foliumMap.eachLayer(layer => {
-                    if (layer instanceof L.Marker) {
-                        allMarkers.push(layer);
-                    }
-                });
-
-                // Функция для подсветки маркера
-                function highlightMarker(index) {
-                    // Сбрасываем стили всех маркеров
-                    allMarkers.forEach(marker => {
-                        const icon = marker.options.icon;
-                        if (icon) {
-                            icon.options.className = icon.options.className?.replace(' marker-highlight', '') || '';
-                            marker.setIcon(icon);
-                        }
-                    });
-
-                    // Подсвечиваем выбранный маркер
-                    if (index >= 0 && index < allMarkers.length) {
-                        const marker = allMarkers[index + 1]; // +1 потому что первый маркер - склад
-                        if (marker) {
-                            const icon = marker.options.icon;
-                            if (icon) {
-                                icon.options.className = (icon.options.className || '') + ' marker-highlight';
-                                marker.setIcon(icon);
-                                marker.openPopup();
-
-                                // Плавный скролл к маркеру
-                                foliumMap.panTo(marker.getLatLng(), {
-                                    animate: true,
-                                    duration: 0.5
-                                });
-                            }
-                        }
-                    }
-
-                    // Подсветка в списке адресов
-                    document.querySelectorAll('.address-item').forEach(item => {
-                        item.classList.remove('highlighted');
-                    });
-                    const selectedItem = document.querySelector(`.address-item[data-index="${index}"]`);
-                    if (selectedItem) {
-                        selectedItem.classList.add('highlighted');
-                        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                }
-
-                // Назначаем обработчики клика для элементов списка
-                document.querySelectorAll('.address-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        highlightMarker(index);
-                    });
-                });
-
-            } catch (error) {
-                console.error('Ошибка при работе с картой:', error);
-            }
+                markerList.push(marker);
+            });
         });
     });
+
+    function highlightMarker(index) {
+        document.querySelectorAll('.address-item').forEach(item => {
+            item.classList.remove('highlighted');
+        });
+        document.querySelector(`.address-item[data-index="${index}"]`).classList.add('highlighted');
+
+        if (!markerList.length || !map) return;
+
+        // Сброс иконок
+        markerList.forEach(m => m.setIcon(L.AwesomeMarkers.icon({
+            icon: 'truck',
+            prefix: 'fa',
+            markerColor: 'blue'
+        })));
+
+        // Подсветка выбранного маркера
+        markerList[index].setIcon(L.AwesomeMarkers.icon({
+            icon: 'truck',
+            prefix: 'fa',
+            markerColor: 'orange'
+        }));
+
+        map.setView(markerList[index].getLatLng(), 14);
+        markerList[index].openPopup();
+    }
 </script>
 </body>
 </html>
