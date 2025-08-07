@@ -40,6 +40,25 @@ def process_delivery_addresses() -> tuple[List[Dict[str, Any]], int]:
     return valid_addresses, success_count
 
 
+@app.route('/toggle_vehicle/<int:vehicle_id>', methods=['POST'])
+def toggle_vehicle(vehicle_id):
+    try:
+        vehicle_found = False
+        for vehicle in Config.VEHICLES:
+            if vehicle['id'] == vehicle_id:
+                vehicle['active'] = not vehicle.get('active', True)
+                vehicle_found = True
+                break
+
+        if not vehicle_found:
+            return f"Vehicle {vehicle_id} not found", 404
+
+        return '', 204
+    except Exception as e:
+        logger.error(f"Error toggling vehicle {vehicle_id}: {str(e)}")
+        return str(e), 500
+
+
 @app.route('/')
 def index():
     try:

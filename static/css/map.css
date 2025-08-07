@@ -314,3 +314,19 @@
     overflow-y: auto;
     padding-right: 5px;
 }
+
+/* Добавьте в конец файла: */
+.vehicle-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    align-items: center; /* Добавлено для выравнивания переключателя */
+}
+
+.vehicle-info {
+    flex: 1; /* Добавлено для правильного растягивания */
+}

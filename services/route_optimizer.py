@@ -25,6 +25,11 @@ class RouteOptimizer:
         if not points:
             return {}
 
+        # Используем только активные автомобили
+        active_vehicles = [v for v in Config.VEHICLES if v.get('active', True)]
+        if not active_vehicles:
+            return {}
+
         # Подготовка заданий с учетом временных окон
         jobs = []
         for idx, point in enumerate(points):
@@ -43,14 +48,14 @@ class RouteOptimizer:
 
         # Подготовка транспортных средств с временными ограничениями
         vehicles = []
-        for vehicle in Config.VEHICLES:
+        for vehicle in active_vehicles:  # Используем только активные
             vehicle_def = {
                 'id': vehicle['id'],
                 'profile': 'driving-car',
                 'start': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
                 'end': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
                 'capacity': [vehicle['capacity']],
-                'time_window': [28800, 64800]  # 8:00-18:00 (в секундах от полуночи)
+                'time_window': [28800, 64800]
             }
             vehicles.append(vehicle_def)
 

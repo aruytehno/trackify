@@ -100,6 +100,27 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+function toggleVehicle(vehicleId, isActive) {
+    fetch(`/toggle_vehicle/${vehicleId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({active: isActive})
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при переключении автомобиля');
+        // Вернуть переключатель в исходное состояние
+        document.querySelector(`.vehicle-item[data-vehicle-id="${vehicleId}"] input[type="checkbox"]`).checked = !isActive;
+    });
+}
 
 // Функция переключения аккордиона
 function toggleAccordion(header) {

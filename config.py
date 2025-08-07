@@ -27,9 +27,9 @@ class Config:
     OPTIMIZE_ROUTES = True
     CACHE_EXPIRY = 3600  # 1 час в секундах
     VEHICLES = [
-        {"id": 1, "capacity": 1000, "color": "blue", "icon": "truck"},
-        {"id": 2, "capacity": 800, "color": "green", "icon": "truck"},
-        {"id": 3, "capacity": 1200, "color": "orange", "icon": "truck"}
+        {"id": 1, "capacity": 1000, "color": "blue", "icon": "truck", "active": True},
+        {"id": 2, "capacity": 800, "color": "green", "icon": "truck", "active": True},
+        {"id": 3, "capacity": 1200, "color": "orange", "icon": "truck", "active": True}
     ]
 
     @staticmethod
