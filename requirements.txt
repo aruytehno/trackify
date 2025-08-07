@@ -2,4 +2,3 @@ python-dotenv
 google-api-python-client
 flask
 openrouteservice
-folium

@@ -1,4 +1,3 @@
-import folium
 from flask import Flask, render_template
 from config import Config
 from services.route_optimizer import RouteOptimizer
@@ -15,26 +14,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-
-
-def create_map(center_coords: List[float]) -> folium.Map:
-    """Создает базовую карту Folium с настройками"""
-    return folium.Map(
-        location=center_coords,
-        zoom_start=12,
-        width='100%',
-        height='90vh',
-        tiles='OpenStreetMap'
-    )
-
-
-def add_warehouse_marker(map_obj: folium.Map, coords: List[float], address: str) -> None:
-    """Добавляет маркер склада на карту"""
-    folium.Marker(
-        location=coords,
-        popup=f"<b>Склад</b><br>{address}",
-        icon=folium.Icon(color='green', icon='warehouse', prefix='fa')
-    ).add_to(map_obj)
 
 
 def process_delivery_addresses() -> tuple[List[Dict[str, Any]], int]:
@@ -68,55 +47,29 @@ def index():
         warehouse_coords = Config.WAREHOUSE_COORDS
         warehouse_address = Config.WAREHOUSE_ADDRESS
 
-        # Создаем карту
-        m = create_map(warehouse_coords)
-        add_warehouse_marker(m, warehouse_coords, warehouse_address)
-
         # Обрабатываем адреса доставки
         valid_addresses, success_count = process_delivery_addresses()
 
-        # Оптимизируем маршруты для всех автомобилей
+        # Оптимизируем маршруты
         optimizer = RouteOptimizer()
         optimized_routes = optimizer.optimize(valid_addresses)
 
-        # Собираем все координаты для автоматического масштабирования
-        all_coords = [warehouse_coords]
-        route_colors = {v['id']: v['color'] for v in Config.VEHICLES}
-
-        # Добавляем маршруты и маркеры на карту
+        # Подготавливаем данные о маршрутах для шаблона
         route_details = {}
         for vehicle_id, route in optimized_routes.items():
-            color = route_colors.get(vehicle_id, 'gray')
+            color = next(
+                (v['color'] for v in Config.VEHICLES if v['id'] == vehicle_id),
+                'gray'
+            )
 
-            # Сохраняем точки маршрута для JS
             route_points = []
             for point in route.points:
-                coords = [point.lat, point.lon]
                 route_points.append({
                     'lat': point.lat,
                     'lon': point.lon,
                     'popup': f"<b>{point.company}</b><br>{point.address}",
                     'weight': point.weight
                 })
-                all_coords.append(coords)
-
-            # Добавляем линию маршрута
-            folium.PolyLine(
-                locations=[(point.lat, point.lon) for point in route.points],
-                color=color,
-                weight=5,
-                opacity=0.7,
-                popup=f"Автомобиль {vehicle_id}",
-                tooltip=f"Маршрут {vehicle_id}"
-            ).add_to(m)
-
-            # Добавляем маркеры для этого маршрута
-            for point in route.points:
-                folium.Marker(
-                    location=[point.lat, point.lon],
-                    popup=f"<b>{point.company}</b><br>{point.address}<br>Автомобиль: {vehicle_id}",
-                    icon=folium.Icon(color=color, icon='truck', prefix='fa')
-                ).add_to(m)
 
             route_details[vehicle_id] = {
                 'color': color,
@@ -125,17 +78,10 @@ def index():
                 'stops_count': len(route.points)
             }
 
-        # Автоматическое масштабирование под все точки
-        if len(all_coords) > 1:
-            m.fit_bounds(all_coords)
-
-        logger.info(f"Map generated with {success_count} delivery points across {len(optimized_routes)} vehicles")
-
-        map_html = m.get_root().render()
+        logger.info(f"Generated routes for {success_count} delivery points across {len(optimized_routes)} vehicles")
 
         return render_template(
             'index.html',
-            # map_html=m.get_root().render(),  # Убрать эту строку
             warehouse_address=warehouse_address,
             addresses=valid_addresses,
             vehicles=Config.VEHICLES,
