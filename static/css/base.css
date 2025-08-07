@@ -1,8 +1,10 @@
 /* static/css/base.css */
-body {
+html, body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    height: 100vh;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 .error-box {

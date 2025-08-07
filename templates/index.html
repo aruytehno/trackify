@@ -1,38 +1,31 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trackify - Карта заказов</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
-</head>
+<!-- Измените body в templates/index.html -->
 <body>
-    <div class="sidebar">
-        <h1>Trackify</h1>
+    <div class="main-container">
+        <div class="sidebar">
+            <h1>Trackify</h1>
 
-        <div class="warehouse-info">
-            <h3>Адрес склада</h3>
-            <p>{{ warehouse_address }}</p>
-        </div>
-
-        <div class="address-list">
-            <h3>Адреса доставки ({{ addresses|length }})</h3>
-            {% for address in addresses %}
-            <div class="address-item"
-                 data-index="{{ loop.index0 }}"
-                 onclick="highlightMarker({{ loop.index0 }})">
-                <strong>{{ address.company or 'Без названия' }}</strong><br>
-                {{ address.address }}
+            <div class="warehouse-info">
+                <h3>Адрес склада</h3>
+                <p>{{ warehouse_address }}</p>
             </div>
-            {% endfor %}
-        </div>
-    </div>
 
-    <div class="map-container">
-        <div id="map">
-            {{ map_html|safe }}
+            <div class="address-list">
+                <h3>Адреса доставки ({{ addresses|length }})</h3>
+                {% for address in addresses %}
+                <div class="address-item"
+                     data-index="{{ loop.index0 }}"
+                     onclick="highlightMarker({{ loop.index0 }})">
+                    <strong>{{ address.company or 'Без названия' }}</strong><br>
+                    {{ address.address }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map">
+                {{ map_html|safe }}
+            </div>
         </div>
     </div>
 
@@ -42,4 +35,3 @@
     <!-- Подключение JavaScript -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
-</html>
