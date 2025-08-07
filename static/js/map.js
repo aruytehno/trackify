@@ -14,11 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
     }
 
-    // Удаляем карту, созданную Folium (если есть)
-    const mapContainer = document.getElementById('map');
-    if (mapContainer._leaflet_map) {
-        mapContainer._leaflet_map.remove();
-    }
 
     // Создаем новую карту Leaflet
     const map = L.map('map').setView(

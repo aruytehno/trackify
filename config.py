@@ -17,7 +17,7 @@ class Config:
     WAREHOUSE_ADDRESS = os.getenv('WAREHOUSE_ADDRESS')
     WAREHOUSE_LAT = float(os.getenv('WAREHOUSE_LAT'))
     WAREHOUSE_LON = float(os.getenv('WAREHOUSE_LON'))
-    WAREHOUSE_COORDS = [WAREHOUSE_LAT, WAREHOUSE_LON]  # Для Folium [lat, lon]
+    WAREHOUSE_COORDS = [WAREHOUSE_LAT, WAREHOUSE_LON]  # [lat, lon]
 
     if not all([WAREHOUSE_ADDRESS, WAREHOUSE_LAT, WAREHOUSE_LON]):
         raise ValueError("Необходимо указать WAREHOUSE_ADDRESS, WAREHOUSE_LAT и WAREHOUSE_LON в .env")
