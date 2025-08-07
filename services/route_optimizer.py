@@ -3,7 +3,7 @@ import openrouteservice as ors
 from typing import List, Dict, Optional
 from config import Config, logger
 from models.route import RoutePoint, Route
-from services.geocoder import geocode_address  # Добавить в imports
+from services.geocoder import geocode_address
 
 
 class RouteOptimizer:
@@ -12,62 +12,52 @@ class RouteOptimizer:
         try:
             self.warehouse_coords = Config.WAREHOUSE_COORDS
             self.client = ors.Client(key=Config.ORS_API_KEY)
-            self.geocoder = Geocoder()
             logger.info("RouteOptimizer initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize RouteOptimizer: {str(e)}")
             raise
 
-    def optimize(self, addresses: List[Dict]) -> Optional[Route]:
-        # Добавляем склад как стартовую точку
-        warehouse_point = RoutePoint(
-            company="Склад",
-            address=Config.WAREHOUSE_ADDRESS,
-            weight=0,
-            lon=self.warehouse_coords[0],
-            lat=self.warehouse_coords[1]
-        )
-        """
-        Оптимизирует маршрут для заданных адресов
-
-        Args:
-            addresses: Список адресов в формате:
-                [
-                    {
-                        'company': str,
-                        'address': str,
-                        'weight': float,
-                        ...
-                    },
-                    ...
-                ]
-
-        Returns:
-            Route: Оптимизированный маршрут или None в случае ошибки
-        """
+    def optimize(self, addresses: List[Dict]) -> Dict[int, Route]:
         if not addresses:
-            logger.warning("Empty addresses list received")
-            return None
+            return {}
 
-        logger.info(f"Starting route optimization for {len(addresses)} addresses")
+        points = self._prepare_points(addresses)
+        if not points:
+            return {}
+
+        jobs = [{
+            'id': idx,
+            'location': [point.lon, point.lat],
+            'amount': [math.ceil(point.weight)],
+            'service': 300
+        } for idx, point in enumerate(points)]
+
+        vehicles = [{
+            'id': vehicle['id'],
+            'profile': 'driving-car',
+            'start': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
+            'end': [Config.WAREHOUSE_LON, Config.WAREHOUSE_LAT],
+            'capacity': [vehicle['capacity']],
+            'time_window': [28800, 64800]
+        } for vehicle in Config.VEHICLES]
 
         try:
-            points = self._prepare_points(addresses)
-            if not points:
-                return None
+            response = self.client.optimization(
+                jobs=jobs,
+                vehicles=vehicles,
+                geometry=True,
+                options={'g': True}
+            )
 
-            optimized_route = self._get_optimized_route(points)
-            if not optimized_route:
-                return None
+            optimized_routes = {}
+            for vehicle in response['routes']:
+                route_id = vehicle['vehicle']
+                optimized_routes[route_id] = Route.from_ors_response(vehicle, points)
 
-            return Route.from_ors_response(optimized_route, points)
-
-        except ors.exceptions.ApiError as api_err:
-            logger.error(f"ORS API error: {api_err.status_code} - {api_err.message}")
+            return optimized_routes
         except Exception as e:
-            logger.error(f"Optimization error: {str(e)}")
-
-        return None
+            logger.error(f"Route optimization failed: {str(e)}")
+            return {}
 
     def _prepare_points(self, addresses: List[Dict]) -> List[RoutePoint]:
         points = []
@@ -80,7 +70,7 @@ class RouteOptimizer:
                     logger.warning(f"Skipping address without data: {addr}")
                     continue
 
-                coords = self.geocoder.geocode(addr['address'])
+                coords = geocode_address(addr['address'])  # Используйте функцию напрямую
                 if not coords:
                     logger.warning(f"Geocoding failed for address: {addr['address']}")
                     failed_addresses += 1
@@ -106,35 +96,3 @@ class RouteOptimizer:
             logger.warning(f"Failed to process {failed_addresses} addresses")
 
         return points
-
-    def _get_optimized_route(self, points: List[RoutePoint]) -> Optional[Dict]:
-        """Получает оптимизированный маршрут из ORS API"""
-        try:
-            jobs = [{
-                'id': idx,
-                'location': [point.lon, point.lat],
-                'amount': [math.ceil(point.weight / 100)],
-                'service': 300  # Время обслуживания точки в секундах (5 мин)
-            } for idx, point in enumerate(points)]
-
-            return self.client.optimization(
-                jobs=jobs,
-                vehicles=[{
-                    'id': 0,
-                    'profile': 'driving-car',
-                    'start': [30.3155, 59.9386],  # Координаты склада
-                    'end': [30.3155, 59.9386],
-                    'capacity': [100],  # Грузоподъемность (в условных единицах)
-                    'time_window': [28800, 64800]  # Временное окно (8:00-18:00)
-                }],
-                geometry=True,
-                options={
-                    'g': True,  # Включаем геометрию маршрута
-                },
-                matrix_options={
-                    'profile': 'driving-car'
-                }
-            )
-        except Exception as e:
-            logger.error(f"Route optimization failed: {str(e)}")
-            return None

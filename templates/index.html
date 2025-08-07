@@ -30,7 +30,26 @@
                     <p>{{ warehouse_address }}</p>
                 </div>
             </div>
-
+<div class="vehicle-controls">
+    <h3><i class="fas fa-truck"></i> Автопарк</h3>
+    <div class="vehicle-list">
+        {% for vehicle in vehicles %}
+        <div class="vehicle-item" data-vehicle-id="{{ vehicle.id }}">
+            <div class="vehicle-icon" style="color: {{ vehicle.color }};">
+                <i class="fas fa-{{ vehicle.icon }}"></i>
+            </div>
+            <div class="vehicle-info">
+                <strong>Автомобиль {{ vehicle.id }}</strong>
+                <p>Грузоподъемность: {{ vehicle.capacity }} кг</p>
+                <div class="vehicle-status">
+                    <span class="status-indicator {% if vehicle.id in routes %}active{% else %}inactive{% endif %}"></span>
+                    <span>{% if vehicle.id in routes %}На маршруте ({{ routes[vehicle.id].stops_count }} точек){% else %}Свободен{% endif %}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
             <!-- Список адресов -->
             <div class="address-list-container">
                 <div class="address-list-header">

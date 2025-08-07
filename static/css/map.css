@@ -213,3 +213,49 @@
         height: 60vh;
     }
 }
+
+
+.vehicle-controls {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.vehicle-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.vehicle-icon {
+    font-size: 1.5rem;
+    padding-top: 5px;
+}
+
+.vehicle-info {
+    flex: 1;
+}
+
+.vehicle-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-indicator.active {
+    background: #2ecc71;
+}
+
+.status-indicator.inactive {
+    background: #e74c3c;
+}

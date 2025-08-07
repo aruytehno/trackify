@@ -8,6 +8,8 @@ from logging.handlers import RotatingFileHandler
 load_dotenv()
 
 class Config:
+    USE_MOCK_DATA = os.getenv('USE_MOCK_DATA', 'false').lower() == 'true'
+
     GOOGLE_SHEETS_API_KEY = os.getenv('GOOGLE_SHEETS_API_KEY')
     ORS_API_KEY = os.getenv('ORS_API_KEY')
     SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
@@ -21,7 +23,11 @@ class Config:
         raise ValueError("Необходимо указать WAREHOUSE_ADDRESS, WAREHOUSE_LAT и WAREHOUSE_LON в .env")
     OPTIMIZE_ROUTES = True
     CACHE_EXPIRY = 3600  # 1 час в секундах
-
+    VEHICLES = [
+        {"id": 1, "capacity": 1000, "color": "blue", "icon": "truck"},
+        {"id": 2, "capacity": 800, "color": "green", "icon": "truck"},
+        {"id": 3, "capacity": 1200, "color": "orange", "icon": "truck"}
+    ]
 
     @staticmethod
     def init_logging():
