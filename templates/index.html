@@ -39,60 +39,80 @@
     <!-- Основной контейнер -->
     <div class="main-container">
         <!-- Сайдбар -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h1><i class="fas fa-route"></i> Trackify</h1>
-                <div class="warehouse-info">
-                    <h3><i class="fas fa-warehouse"></i> Адрес склада</h3>
-                    <p>{{ warehouse_address }}</p>
-                </div>
-            </div>
-<div class="vehicle-controls">
-    <h3><i class="fas fa-truck"></i> Автопарк</h3>
-    <div class="vehicle-list">
-        {% for vehicle in vehicles %}
-        <div class="vehicle-item" data-vehicle-id="{{ vehicle.id }}">
-            <div class="vehicle-icon" style="color: {{ vehicle.color }};">
-                <i class="fas fa-{{ vehicle.icon }}"></i>
-            </div>
-            <div class="vehicle-info">
-                <strong>Автомобиль {{ vehicle.id }}</strong>
-                <p>Грузоподъемность: {{ vehicle.capacity }} кг</p>
-                <div class="vehicle-status">
-                    <span class="status-indicator {% if vehicle.id in routes %}active{% else %}inactive{% endif %}"></span>
-                    <span>{% if vehicle.id in routes %}На маршруте ({{ routes[vehicle.id].stops_count }} точек){% else %}Свободен{% endif %}</span>
-                </div>
-            </div>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h1><i class="fas fa-route"></i> Trackify</h1>
+        <div class="warehouse-info">
+            <h3><i class="fas fa-warehouse"></i> Адрес склада</h3>
+            <p>{{ warehouse_address }}</p>
         </div>
-        {% endfor %}
     </div>
-</div>
-            <!-- Список адресов -->
-            <div class="address-list-container">
-                <div class="address-list-header">
-                    <h3><i class="fas fa-map-marker-alt"></i> Адреса доставки <span class="badge">{{ addresses|length }}</span></h3>
-                </div>
 
-                <div class="address-list-scroll">
-                    {% for address in addresses %}
-                    <div class="address-item"
-                         data-index="{{ loop.index0 }}"
-                         onclick="highlightMarker({{ loop.index0 }})">
-                        <div class="address-icon">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <div class="address-details">
-                            <strong>{{ address.company or 'Без названия' }}</strong>
-                            <p>{{ address.address }}</p>
-                            {% if address.weight %}
-                            <span class="weight-badge">{{ address.weight }} кг</span>
-                            {% endif %}
+    <!-- Аккордеон: Автопарк -->
+    <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3><i class="fas fa-truck"></i> Автопарк</h3>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="accordion-content">
+            <div class="vehicle-list">
+                {% for vehicle in vehicles %}
+                <div class="vehicle-item" data-vehicle-id="{{ vehicle.id }}">
+                    <div class="vehicle-icon" style="color: {{ vehicle.color }};">
+                        <i class="fas fa-{{ vehicle.icon }}"></i>
+                    </div>
+                    <div class="vehicle-info">
+                        <strong>Автомобиль {{ vehicle.id }}</strong>
+                        <p>Грузоподъемность: {{ vehicle.capacity }} кг</p>
+                        <div class="vehicle-status">
+                            <span class="status-indicator {% if vehicle.id in routes %}active{% else %}inactive{% endif %}"></span>
+                            <span>
+                              {% if vehicle.id in routes %}
+                                На маршруте ({{ routes[vehicle.id].stops_count }} точек)
+                              {% else %}
+                                Свободен
+                              {% endif %}
+                            </span>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
         </div>
+    </div>
+
+    <!-- Аккордеон: Адреса доставки -->
+    <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3>
+              <i class="fas fa-map-marker-alt"></i> Адреса доставки
+              <span class="badge">{{ addresses|length }}</span>
+            </h3>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="accordion-content">
+            <div class="address-list-scroll">
+                {% for address in addresses %}
+                <div class="address-item"
+                     data-index="{{ loop.index0 }}"
+                     onclick="highlightMarker({{ loop.index0 }})">
+                    <div class="address-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="address-details">
+                        <strong>{{ address.company or 'Без названия' }}</strong>
+                        <p>{{ address.address }}</p>
+                        {% if address.weight %}
+                        <span class="weight-badge">{{ address.weight }} кг</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
 
         <!-- Карта -->
         <div class="map-container">

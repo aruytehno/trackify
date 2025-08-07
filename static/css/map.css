@@ -259,3 +259,45 @@
 .status-indicator.inactive {
     background: #e74c3c;
 }
+
+/* Аккордион */
+.accordion {
+    width: 100%;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.accordion-header {
+    padding: 12px 15px;
+    background: #2c3e50;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+    background: #34495e;
+}
+
+.accordion-header i {
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.collapsed i {
+    transform: rotate(-90deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: white;
+}
+
+.accordion-content.expanded {
+    max-height: 1000px; /* Достаточно большое значение для контента */
+}

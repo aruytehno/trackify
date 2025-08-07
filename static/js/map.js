@@ -78,3 +78,23 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 });
+
+
+// Функция переключения аккордиона
+function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    header.classList.toggle('collapsed');
+    content.classList.toggle('expanded');
+
+    // Автопрокрутка к только что открытой панели (необязательно)
+    if (content.classList.contains('expanded')) {
+        setTimeout(() => {
+            header.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 300);
+    }
+}
+
+// Опционально: при загрузке закрыть все аккордеоны:
+// document.addEventListener('DOMContentLoaded', () => {
+//   document.querySelectorAll('.accordion-header').forEach(h => h.classList.add('collapsed'));
+// });
